@@ -21,12 +21,13 @@ def main():
     data =  pd.read_csv('image_names.csv', sep=';')
     data = data.to_dict('list')
     image_names = dict(zip(data['sku'], data['name']))
+    sku_prices = dict(zip(data['sku'], data['price']))
     items_urls = get_shein_items_urls(driver, image_names)
 
     # Go to each of the urls and download all the full images as webp.
     for sku, url in items_urls.items():
         go_to_url(driver, url)
-        download_images(driver, image_names[sku])
+        download_images(driver, image_names[sku], sku_prices[sku])
 
 
 
@@ -78,7 +79,7 @@ def get_shein_items_urls(driver, img_names):
     return urls
  
 
-def download_images(driver, image_name):
+def download_images(driver, image_name, price):
     # Clickear en imagen para agrandarla
     driver.find_element(By.XPATH, '//div[@class="swiper-slide product-intro__main-item cursor-zoom-in swiper-slide-active"]').click()
     sleep(2)
@@ -92,7 +93,7 @@ def download_images(driver, image_name):
         sleep(0.4)
         # Get full image
         full_image = driver.find_element(By.XPATH, '//div[@class="productimg-extend__main-image"]//img')
-        full_name = 'images\\' + image_name + ' (' + str(counter) + ').png'
+        full_name = 'images\\' + image_name + ' $' + str(price) +' (' + str(counter) + ').png'
         full_image.screenshot(full_name)
         counter += 1
 
