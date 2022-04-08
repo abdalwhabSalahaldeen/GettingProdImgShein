@@ -41,7 +41,7 @@ def shein_login(driver):
     """
     Go to shein login page, find text inputs and write user and pass using send_keys
     """
-    go_to_url('https://us.shein.com/user/auth/login')
+    go_to_url(driver, 'https://us.shein.com/user/auth/login')
 
 
     username = input('Username: ')
@@ -54,11 +54,25 @@ def shein_login(driver):
     pass_input = driver.find_element(By.XPATH, '//div[@class="ksLow S-input S-input_suffix"]//*[contains(@aria-label,"Password:")]')
     pass_input.send_keys(password)
 
+    # Press submit button
+    driver.find_element(By.XPATH, '//div[@class="page-login__emailLoginItem"]//div[@class="login-btn"]//button').click()
+    
+
+    sleep(5)
+
 
 def get_shein_items_urls(driver, img_names):
     urls = []
     order_rows = driver.find_elements(By.XPATH, '//table[@class="c-order-detail-table"]//tbody//tr')
 
+    for row in order_rows:
+        # get sku of each row and compare with the data to see if image download is necessary
+        sku = row.find_element(By.XPATH, '//td[3]').text
+
+        if sku in img_names.keys():
+            url = row.find_element(By.XPATH, '//td[1]//div//div[2]//div//p//a').get_attribute('href')
+            urls.append(url)
+    input(urls)
 
     return urls
  
