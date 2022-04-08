@@ -24,8 +24,10 @@ def main():
     items_urls = get_shein_items_urls(driver, image_names)
 
     # Go to each of the urls and download all the full images as webp.
-    for item_url in items_urls:
-        go_to_url(driver, item_url)
+    for sku, url in items_urls.items():
+        go_to_url(driver, url)
+        download_images(driver, image_names[sku])
+
 
 
 def go_to_url(driver, url):
@@ -58,24 +60,42 @@ def shein_login(driver):
     driver.find_element(By.XPATH, '//div[@class="page-login__emailLoginItem"]//div[@class="login-btn"]//button').click()
     
 
-    sleep(5)
+    sleep(10)
 
 
 def get_shein_items_urls(driver, img_names):
-    urls = []
+    urls = {}
     order_rows = driver.find_elements(By.XPATH, '//table[@class="c-order-detail-table"]//tbody//tr')
 
     for row in order_rows:
         # get sku of each row and compare with the data to see if image download is necessary
-        sku = row.find_element(By.XPATH, '//td[3]').text
+        sku = row.find_element(By.XPATH, './/td[3]').text
 
         if sku in img_names.keys():
-            url = row.find_element(By.XPATH, '//td[1]//div//div[2]//div//p//a').get_attribute('href')
-            urls.append(url)
-    input(urls)
-
+            url = row.find_element(By.XPATH, './/td[1]//div//div[2]//div//span//p//a').get_attribute('href')
+            print(url)
+            urls[sku] = url
     return urls
  
+
+def download_images(driver, image_name):
+    # Clickear en imagen para agrandarla
+    driver.find_element(By.XPATH, '//div[@class="swiper-slide product-intro__main-item cursor-zoom-in swiper-slide-active"]').click()
+    sleep(2)
+    images =  driver.find_elements(By.XPATH, '//div[@class="productimg-extend__thumbnails"]//ul//li')
+    
+    # Hover in each of the side images and screenshot the big image
+    counter = 0
+    for image in images:
+        hover = ActionChains(driver).move_to_element(image)
+        hover.perform()  
+        sleep(0.4)
+        # Get full image
+        full_image = driver.find_element(By.XPATH, '//div[@class="productimg-extend__main-image"]//img')
+        full_name = 'images\\' + image_name + ' (' + str(counter) + ').png'
+        full_image.screenshot(full_name)
+        counter += 1
+
 
 
 if __name__ == '__main__':
