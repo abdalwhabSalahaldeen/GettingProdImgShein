@@ -3,12 +3,14 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+import urllib.request
 
 def main():
 
     # open google chrome browser and login in us.shein.com
     driver = webdriver.Chrome()
     driver.implicitly_wait(4)
+    driver.maximize_window()
     shein_login(driver)
 
     # Get order number and go to the link
@@ -21,13 +23,14 @@ def main():
     data =  pd.read_csv('image_names.csv', sep=';')
     data = data.to_dict('list')
     image_names = dict(zip(data['sku'], data['name']))
-    sku_prices = dict(zip(data['sku'], data['price']))
     items_urls = get_shein_items_urls(driver, image_names)
 
     # Go to each of the urls and download all the full images as webp.
     for sku, url in items_urls.items():
         go_to_url(driver, url)
-        download_images(driver, image_names[sku], sku_prices[sku])
+        print(image_names)
+        sleep(0.5)
+        download_images(driver, image_names[sku])
 
 
 
@@ -79,11 +82,12 @@ def get_shein_items_urls(driver, img_names):
     return urls
  
 
-def download_images(driver, image_name, price):
+def download_images(driver, image_name):
     # Clickear en imagen para agrandarla
     driver.find_element(By.XPATH, '//div[@class="swiper-slide product-intro__main-item cursor-zoom-in swiper-slide-active"]').click()
     sleep(2)
     images =  driver.find_elements(By.XPATH, '//div[@class="productimg-extend__thumbnails"]//ul//li')
+
     
     # Hover in each of the side images and screenshot the big image
     counter = 0
@@ -92,9 +96,9 @@ def download_images(driver, image_name, price):
         hover.perform()  
         sleep(0.4)
         # Get full image
-        full_image = driver.find_element(By.XPATH, '//div[@class="productimg-extend__main-image"]//img')
-        full_name = 'images\\' + image_name + ' $' + str(price) +' (' + str(counter) + ').png'
-        full_image.screenshot(full_name)
+        full_image_url = driver.find_element(By.XPATH, '//div[@class="productimg-extend__main-image"]//img').get_attribute("src")
+        full_name = 'images\\' + image_name +' (' + str(counter) + ').png'
+        urllib.request.urlretrieve(full_image_url, full_name)
         counter += 1
 
 

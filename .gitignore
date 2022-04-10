@@ -1,3 +1,4 @@
 env
 images
-base.py
+*.txt
+*.csv
