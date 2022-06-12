@@ -1,9 +1,14 @@
 from time import sleep
-import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+
+import pandas as pd
 import urllib.request
+from PIL import Image
+from glob import glob
+import os
+
 
 def main():
 
@@ -28,10 +33,10 @@ def main():
     # Go to each of the urls and download all the full images as webp.
     for sku, url in items_urls.items():
         go_to_url(driver, url)
-        print(image_names)
         sleep(0.5)
         download_images(driver, image_names[sku])
 
+    convert_webp_to_png()
 
 
 def go_to_url(driver, url):
@@ -64,8 +69,6 @@ def shein_login(driver):
     driver.find_element(By.XPATH, '//div[@class="page-login__emailLoginItem"]//div[@class="login-btn"]//button').click()
     
 
-    sleep(10)
-
 
 def get_shein_items_urls(driver, img_names):
     urls = {}
@@ -95,13 +98,20 @@ def download_images(driver, image_name):
         hover = ActionChains(driver).move_to_element(image)
         hover.perform()  
         sleep(0.4)
-        # Get full image
-        full_image_url = driver.find_element(By.XPATH, '//div[@class="productimg-extend__main-image"]//img').get_attribute("src")
-        full_name = 'images\\' + image_name +' (' + str(counter) + ').png'
+
+        # Get full image url
+        full_image_url = 'https:' + driver.find_element(By.XPATH, '//div[@class="productimg-extend__main-image"]//img').get_attribute("src")
+        full_name = 'images\\' + image_name +' (' + str(counter) + ').webp'
+
         urllib.request.urlretrieve(full_image_url, full_name)
         counter += 1
 
-
+def convert_webp_to_png():
+    webp_images = glob("images/*.webp")
+    for img in webp_images:
+        converted_img_name = img.split(sep="\\")[1].split(sep=".")[0] + ".png"  # Extrae solamente en el nombre del archivo
+        Image.open(img).convert("RGB").save("images\\" + converted_img_name,"png")
+        os.remove(img)
 
 if __name__ == '__main__':
     main()

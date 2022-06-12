@@ -1,4 +1,4 @@
 env
 images
-*.txt
-*.csv
+datos.txt
+image_names.csv
