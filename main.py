@@ -2,6 +2,7 @@ from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.options import Options
 
 import pandas as pd
 import urllib.request
@@ -13,7 +14,9 @@ import os
 def main():
 
     # open google chrome browser and login in us.shein.com
-    driver = webdriver.Chrome()
+    options = Options()
+    options.binary_location = "C:\Program Files\Google\Chrome Beta\Application\chrome.exe"
+    driver = webdriver.Chrome(chrome_options=options)
     driver.implicitly_wait(4)
     driver.maximize_window()
     shein_login(driver)
@@ -25,7 +28,7 @@ def main():
 
 
     # Get urls of the items in x Shein order. Convert the data in a dictionery sku:name from the dataframe
-    data =  pd.read_csv('image_names.csv', sep=';')
+    data =  pd.read_csv('imageNames.csv', sep=';')
     data = data.to_dict('list')
     image_names = dict(zip(data['sku'], data['name']))
     items_urls = get_shein_items_urls(driver, image_names)
@@ -59,10 +62,10 @@ def shein_login(driver):
     password = input('Password: ')
 
     # find user text input and send username
-    user_input = driver.find_element(By.XPATH, '//div[@class="ksLow S-input S-input_suffix"]//*[contains(@aria-label,"Email Address:")]')
+    user_input = driver.find_element(By.XPATH, '//div[@class="npiyp S-input S-input_suffix"]//*[contains(@aria-label,"Email Address:")]')
     user_input.send_keys(username)
 
-    pass_input = driver.find_element(By.XPATH, '//div[@class="ksLow S-input S-input_suffix"]//*[contains(@aria-label,"Password:")]')
+    pass_input = driver.find_element(By.XPATH, '//div[@class="npiyp S-input S-input_suffix"]//*[contains(@aria-label,"Password:")]')
     pass_input.send_keys(password)
 
     # Press submit button
@@ -82,6 +85,7 @@ def get_shein_items_urls(driver, img_names):
             url = row.find_element(By.XPATH, './/td[1]//div//div[2]//div//span//p//a').get_attribute('href')
             print(url)
             urls[sku] = url
+
     return urls
  
 
