@@ -2,7 +2,6 @@ from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.chrome.options import Options
 
 import pandas as pd
 import urllib.request
@@ -14,9 +13,8 @@ import os
 def main():
 
     # open google chrome browser and login in us.shein.com
-    options = Options()
-    options.binary_location = "C:\Program Files\Google\Chrome Beta\Application\chrome.exe"
-    driver = webdriver.Chrome(chrome_options=options)
+    driver = webdriver.Edge()
+
     driver.implicitly_wait(4)
     driver.maximize_window()
     shein_login(driver)
@@ -37,6 +35,7 @@ def main():
     for sku, url in items_urls.items():
         go_to_url(driver, url)
         sleep(0.5)
+        input()
         download_images(driver, image_names[sku])
 
     convert_webp_to_png()
@@ -75,7 +74,9 @@ def shein_login(driver):
 
 def get_shein_items_urls(driver, img_names):
     urls = {}
-    order_rows = driver.find_elements(By.XPATH, '//table[@class="c-order-detail-table"]//tbody//tr')
+    #sleep(5)
+    #order_rows = driver.find_elements(By.XPATH, '//table[@class="c-order-detail-table"]//tbody//tr')
+    order_rows = driver.find_elements(By.XPATH, '//html//body//div[1]//div[1]//div[1]//div[2]//div[2]//div[2]//div//div//table//tbody//tr')
 
     for row in order_rows:
         # get sku of each row and compare with the data to see if image download is necessary
@@ -94,7 +95,6 @@ def download_images(driver, image_name):
     driver.find_element(By.XPATH, '//div[@class="swiper-slide product-intro__main-item cursor-zoom-in swiper-slide-active"]').click()
     sleep(2)
     images =  driver.find_elements(By.XPATH, '//div[@class="productimg-extend__thumbnails"]//ul//li')
-
     
     # Hover in each of the side images and screenshot the big image
     counter = 0
